@@ -24,31 +24,36 @@ export const reservationData = {
   valid: {
     date: '2026-05-20',
     time: '18:00',
-    guests: '4'
+    guests: '4',
+    specialRequest: 'Window seat'
   },
 
   pastDate: {
     date: '2020-01-01',
     time: '18:00',
-    guests: '2'
+    guests: '2',
+    specialRequest: ''
   },
 
   outsideHours: {
     date: '2026-05-20',
     time: '03:00',
-    guests: '2'
+    guests: '2',
+    specialRequest: 'Late night booking'
   },
 
   exceedCapacity: {
     date: '2026-05-20',
     time: '18:00',
-    guests: '11'
+    guests: '11',
+    specialRequest: ''
   },
 
   doubleBooking: {
     date: '2026-05-20',
     time: '19:00',
-    guests: '2'
+    guests: '2',
+    specialRequest: 'Birthday setup'
   }
 };
 

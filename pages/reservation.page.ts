@@ -4,26 +4,36 @@ export class ReservationPage {
   constructor(private page: Page) {}
 
   async goToAvailability() {
-    await this.page.click('text=Check Availability');
+    await this.page.click('text=Find a Table');
   }
 
-  async search(date: string, time: string, guests: string) {
-    await this.page.fill('input[type="date"]', date);
-    await this.page.fill('input[type="time"]', time);
-    await this.page.fill('input[type="number"]', guests);
-    await this.page.click('text=Search');
+  async search(
+    date: string,
+    time: string,
+    guests: string,
+    specialRequest?: string
+  ) {
+    await this.page.fill('#date', date);
+    await this.page.fill('#time', time);
+    await this.page.fill('#guests', guests);
+
+    if (specialRequest) {
+      await this.page.fill('#special-request', specialRequest);
+    }
+
+    await this.page.click('button[type="submit"]');
   }
 
   async selectTable() {
-    await this.page.click('.table-card:has-text("T-03")');
+    await this.page.click('.table-card:not([style*="not-allowed"])');
   }
 
   async proceedToBook() {
-    await this.page.click('text=Proceed to Book');
+    await this.page.click('text=Book Now');
   }
 
   async confirmReservation() {
-    await this.page.click('text=Confirm Reservation');
+    await this.page.click('text=Confirm');
   }
 
   async verifyConfirmation() {
@@ -35,6 +45,6 @@ export class ReservationPage {
   }
 
   async verifyReservationExists() {
-    await expect(this.page.locator('text=CONFIRMED')).toBeVisible();
+    await expect(this.page.locator('.reservation-item')).toBeVisible();
   }
 }

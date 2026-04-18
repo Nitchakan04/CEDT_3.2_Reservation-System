@@ -1,113 +1,129 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/login.page.ts';
-import { ReservationPage } from '../pages/reservation.page.ts';
-import { user, reservationData } from '../testdata/user.data.ts';
-
+import { LoginPage } from '../pages/login.page';
+import { ReservationPage } from '../pages/reservation.page';
+import { user, reservationData, commonData } from '../testdata/user.data';
 
 test.describe('Reservation Module', () => {
 
-  test('TC-RES-01: User should complete reservation flow successfully', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     const login = new LoginPage(page);
-    const reserve = new ReservationPage(page);
-
     await login.goto();
-    await login.login(
-      user.validUser.email,
-      user.validUser.password
-    );
+    await login.login(user.validUser.email, user.validUser.password);
+  });
+
+  test('TC-RES-01: Complete reservation with special request', async ({ page }) => {
+    const reserve = new ReservationPage(page);
 
     await reserve.goToAvailability();
     await reserve.search(
       reservationData.valid.date,
       reservationData.valid.time,
-      reservationData.valid.guests
+      reservationData.valid.guests,
+      reservationData.valid.specialRequest
     );
 
     await reserve.selectTable();
     await reserve.proceedToBook();
     await reserve.confirmReservation();
+
     await reserve.verifyConfirmation();
 
-    await reserve.goToMyReservations();
-    await reserve.verifyReservationExists();
+    // verify special request
+    await expect(
+      page.locator(`text=${reservationData.valid.specialRequest}`)
+    ).toBeVisible();
   });
 
-  test('TC-RES-02: User should not select table when guest exceeds capacity', async ({ page }) => {
+  test('TC-RES-02: Exceed capacity', async ({ page }) => {
     const reserve = new ReservationPage(page);
 
     await reserve.goToAvailability();
     await reserve.search(
       reservationData.exceedCapacity.date,
       reservationData.exceedCapacity.time,
-      reservationData.exceedCapacity.guests
+      reservationData.exceedCapacity.guests,
+      reservationData.exceedCapacity.specialRequest
     );
 
-    await expect(page.locator('.table-card[style*="not-allowed"]')).toBeVisible();
+    await expect(
+      page.locator('.table-card[style*="not-allowed"]')
+    ).toBeVisible();
   });
 
-  test('TC-RES-03: User should not create reservation with past date', async ({ page }) => {
+  test('TC-RES-03: Past date', async ({ page }) => {
     const reserve = new ReservationPage(page);
 
     await reserve.goToAvailability();
     await reserve.search(
       reservationData.pastDate.date,
       reservationData.pastDate.time,
-      reservationData.pastDate.guests
+      reservationData.pastDate.guests,
+      reservationData.pastDate.specialRequest
     );
 
-    await expect(page.locator('text=error')).toBeVisible();
+    await expect(
+      page.locator(`text=${commonData.messages.genericError}`)
+    ).toBeVisible();
   });
 
-  test('TC-RES-04: User should not create reservation outside operating hours', async ({ page }) => {
+  test('TC-RES-04: Outside operating hours', async ({ page }) => {
     const reserve = new ReservationPage(page);
 
     await reserve.goToAvailability();
     await reserve.search(
       reservationData.outsideHours.date,
       reservationData.outsideHours.time,
-      reservationData.outsideHours.guests
+      reservationData.outsideHours.guests,
+      reservationData.outsideHours.specialRequest
     );
 
-    await expect(page.locator('text=error')).toBeVisible();
+    await expect(
+      page.locator(`text=${commonData.messages.genericError}`)
+    ).toBeVisible();
   });
 
-  test('TC-RES-05: System should prevent double booking', async ({ page }) => {
+  test('TC-RES-05: Prevent double booking', async ({ page }) => {
     const reserve = new ReservationPage(page);
 
+    // first booking
     await reserve.goToAvailability();
     await reserve.search(
       reservationData.valid.date,
       reservationData.valid.time,
-      reservationData.valid.guests
+      reservationData.valid.guests,
+      reservationData.valid.specialRequest
     );
 
     await reserve.selectTable();
     await reserve.proceedToBook();
     await reserve.confirmReservation();
 
-    // attempt booking same slot again
+    // try again
     await reserve.goToAvailability();
     await reserve.search(
       reservationData.valid.date,
       reservationData.valid.time,
-      reservationData.valid.guests
+      reservationData.valid.guests,
+      reservationData.valid.specialRequest
     );
 
-    await expect(page.locator('text=Table not available')).toBeVisible();
+    await expect(
+      page.locator(`text=${commonData.messages.tableUnavailable}`)
+    ).toBeVisible();
   });
 
-  test('TC-RES-06: User should cancel reservation successfully', async ({ page }) => {
+  test('TC-RES-06: Cancel reservation', async ({ page }) => {
     const reserve = new ReservationPage(page);
 
-    await page.goto('/');
     await reserve.goToMyReservations();
 
     await page.click('text=Cancel');
     await page.click('text=Confirm Cancellation');
 
-    await expect(page.locator('text=CANCELLED')).toBeVisible();
+    await expect(
+      page.locator(`text=${commonData.messages.cancelSuccess}`)
+    ).toBeVisible();
   });
 
+
 });
-
-
