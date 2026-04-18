@@ -42,7 +42,7 @@ export const reservationData = {
   exceedCapacity: {
     date: '2026-05-20',
     time: '18:00',
-    guests: '10'
+    guests: '11'
   },
 
   doubleBooking: {
