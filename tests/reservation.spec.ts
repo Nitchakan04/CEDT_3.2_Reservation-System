@@ -32,6 +32,8 @@ test.describe('Reservation Module', () => {
     await expect(
       page.locator(`text=${reservationData.valid.specialRequest}`)
     ).toBeVisible();
+    await reserve.goToMyReservations(); 
+    await reserve.verifyReservationExists();
   });
 
   test('TC-RES-02: Exceed capacity', async ({ page }) => {
